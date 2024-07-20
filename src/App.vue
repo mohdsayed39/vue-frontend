@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <div class="system-bar">
+    <!-- <div class="system-bar">
       <img alt="Bank logo" src="~@/assets/logoImage.png" width="150" style="height: 60px;" />
-    </div>
+    </div> -->
     <router-view></router-view>
   </div>
 </template>

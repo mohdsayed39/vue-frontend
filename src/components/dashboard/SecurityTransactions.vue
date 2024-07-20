@@ -2,189 +2,192 @@
     <div>
         <div class="flex justify-between items-center mb-4">
             <div>
-                <label for="search" class="mr-2">Search by Rec ID:</label>
-                <input 
-                    id="search" 
-                    v-model="searchQuery" 
-                    type="text" 
-                    placeholder="Enter Rec ID" 
-                    class="px-2 py-1 border rounded"
-                />
+                <label for="search" class="font-bold font-l mr-2">Filter:</label>
+                <input id="search" v-model="searchQuery" type="text" placeholder="Enter YSM ID"
+                    class="px-2 py-1 border rounded" />
+            </div>
+            <div>
+                <label for="itemsPerPage" class="mr-2">Items per page:</label>
+                <select id="itemsPerPage" v-model="itemsPerPage" class="px-2 py-1 border rounded">
+                    <option v-for="option in itemsPerPageOptions" :key="option" :value="option">
+                        {{ option }}
+                    </option>
+                </select>
             </div>
         </div>
         <div v-if="isLoading" class="text-center my-8">
             Loading...
         </div>
         <div v-else>
-            <div class="overflow-x-auto">
-                <table class="table-auto min-w-full border-collapse border border-gray-200">
-                    <caption class="text-lg font-bold mb-4">Security Transactions Information</caption>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-bordered table-sm">
                     <thead>
-                        <tr class="bg-gray-100">
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('rec_id')">Rec ID</button>
-                                <span v-if="sortByColumn === 'rec_id'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('entry_id')">Entry ID</button>
-                                <span v-if="sortByColumn === 'entry_id'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('security_account')">Security Account</button>
-                                <span v-if="sortByColumn === 'security_account'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('security_number')">Security Number</button>
-                                <span v-if="sortByColumn === 'security_number'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('depository')">Depositry</button>
-                                <span v-if="sortByColumn === 'depository'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('trade_date')">Trade Date</button>
-                                <span v-if="sortByColumn === 'trade_date'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('value_date')">Value Date</button>
-                                <span v-if="sortByColumn === 'value_date'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('trans_type')">Trans Type</button>
-                                <span v-if="sortByColumn === 'trans_type'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('security_currency')">Security Currency</button>
-                                <span v-if="sortByColumn === 'security_currency'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('price_type')">Price Type</button>
-                                <span v-if="sortByColumn === 'price_type'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('trade_currency')">Trade Currency</button>
-                                <span v-if="sortByColumn === 'trade_currency'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('no_nominal')">No Nominal</button>
-                                <span v-if="sortByColumn === 'no_nominal'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('price')">Price</button>
-                                <span v-if="sortByColumn === 'price'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('gross_amt_trd_curr')">Gross Amt Trade Currency</button>
-                                <span v-if="sortByColumn === 'gross_amt_trd_curr'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('broker_comms')">Broker Comms</button>
-                                <span v-if="sortByColumn === 'broker_comms'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('net_amt_trade')">Net Amt Trade</button>
-                                <span v-if="sortByColumn === 'net_amt_trade'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('account_number')">Account Number</button>
-                                <span v-if="sortByColumn === 'account_number'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('account_currency')">Account Currency</button>
-                                <span v-if="sortByColumn === 'account_currency'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('ref_currency')">Ref Currency</button>
-                                <span v-if="sortByColumn === 'ref_currency'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('delivery_instr')">Delivery Instr</button>
-                                <span v-if="sortByColumn === 'delivery_instr'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('cost_invst_sec_ccy')">COST INVST SEC CCY</button>
-                                <span v-if="sortByColumn === 'cost_invst_sec_ccy'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('cost_invst_ref_ccy')">COST INVST REF CCY</button>
-                                <span v-if="sortByColumn === 'cost_invst_ref_ccy'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('prof_loss_sec_ccy')">PROF LOSS SEC CCY</button>
-                                <span v-if="sortByColumn === 'prof_loss_sec_ccy'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('reversal_date')">Reversal Date</button>
-                                <span v-if="sortByColumn === 'reversal_date'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('date_updated')">Date Updated</button>
-                                <span v-if="sortByColumn === 'date_updated'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('book_cost_sec_ccy')">BOOK COST SEC CCY</button>
-                                <span v-if="sortByColumn === 'book_cost_sec_ccy'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                            <th class="px-4 py-2 text-left text-xs">
-                                <button @click="sortBy('book_cost_ref_ccy')">BOOK COST REF CCY</button>
-                                <span v-if="sortByColumn === 'delivery_instr'">
-                                    {{ sortDirection === 'asc' ? '▲' : '▼' }}
-                                </span>
-                            </th>
-                        </tr>
-                    </thead>
+    <tr class="bg-gray-100">
+        <th class="py-2 text-xs cursor-pointer" @click="sortBy('rec_id')">
+            <div class="flex items-center">
+                Rec ID
+                <i :class="sortIcon('rec_id')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="py-2 text-xs cursor-pointer" @click="sortBy('entry_id')">
+            <div class="flex items-center">
+                Entry ID
+                <i :class="sortIcon('entry_id')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 text-left text-xs cursor-pointer" @click="sortBy('security_account')">
+            <div class="flex items-center">
+                Security Account
+                <i :class="sortIcon('security_account')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 text-left text-xs cursor-pointer" @click="sortBy('security_number')">
+            <div class="flex items-center">
+                Security Number
+                <i :class="sortIcon('security_number')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 text-left text-xs cursor-pointer" @click="sortBy('depository')">
+            <div class="flex items-center">
+                Depository
+                <i :class="sortIcon('depository')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 text-left text-xs cursor-pointer" @click="sortBy('trade_date')">
+            <div class="flex items-center">
+                Trade Date
+                <i :class="sortIcon('trade_date')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 text-left text-xs cursor-pointer" @click="sortBy('value_date')">
+            <div class="flex items-center">
+                Value Date
+                <i :class="sortIcon('value_date')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 text-left text-xs cursor-pointer" @click="sortBy('trans_type')">
+            <div class="flex items-center">
+                Trans Type
+                <i :class="sortIcon('trans_type')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 text-left text-xs cursor-pointer" @click="sortBy('security_currency')">
+            <div class="flex items-center">
+                Security Currency
+                <i :class="sortIcon('security_currency')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 text-left text-xs cursor-pointer" @click="sortBy('price_type')">
+            <div class="flex items-center">
+                Price Type
+                <i :class="sortIcon('price_type')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 text-left text-xs cursor-pointer" @click="sortBy('trade_currency')">
+            <div class="flex items-center">
+                Trade Currency
+                <i :class="sortIcon('trade_currency')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 text-left text-xs cursor-pointer" @click="sortBy('no_nominal')">
+            <div class="flex items-center">
+                No Nominal
+                <i :class="sortIcon('no_nominal')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 text-left text-xs cursor-pointer" @click="sortBy('price')">
+            <div class="flex items-center">
+                Price
+                <i :class="sortIcon('price')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-32 text-left text-xs cursor-pointer" @click="sortBy('gross_amt_trd_curr')">
+            <div class="flex items-center">
+                Gross Amt Trade Currency
+                <i :class="sortIcon('gross_amt_trd_curr')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-24 text-left text-xs cursor-pointer" @click="sortBy('broker_comms')">
+            <div class="flex items-center">
+                Broker Comms
+                <i :class="sortIcon('broker_comms')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-24 text-left text-xs cursor-pointer" @click="sortBy('net_amt_trade')">
+            <div class="flex items-center">
+                Net Amt Trade
+                <i :class="sortIcon('net_amt_trade')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-32 text-left text-xs cursor-pointer" @click="sortBy('account_number')">
+            <div class="flex items-center">
+                Account Number
+                <i :class="sortIcon('account_number')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-32 text-left text-xs cursor-pointer" @click="sortBy('account_currency')">
+            <div class="flex items-center">
+                Account Currency
+                <i :class="sortIcon('account_currency')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-24 text-left text-xs cursor-pointer" @click="sortBy('ref_currency')">
+            <div class="flex items-center">
+                Ref Currency
+                <i :class="sortIcon('ref_currency')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-32 text-left text-xs cursor-pointer" @click="sortBy('delivery_instr')">
+            <div class="flex items-center">
+                Delivery Instr
+                <i :class="sortIcon('delivery_instr')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-32 text-left text-xs cursor-pointer" @click="sortBy('cost_invst_sec_ccy')">
+            <div class="flex items-center">
+                Cost Invst Sec CCY
+                <i :class="sortIcon('cost_invst_sec_ccy')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-32 text-left text-xs cursor-pointer" @click="sortBy('cost_invst_ref_ccy')">
+            <div class="flex items-center">
+                Cost Invst Ref CCY
+                <i :class="sortIcon('cost_invst_ref_ccy')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-32 text-left text-xs cursor-pointer" @click="sortBy('prof_loss_sec_ccy')">
+            <div class="flex items-center">
+                Prof Loss Sec CCY
+                <i :class="sortIcon('prof_loss_sec_ccy')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-24 text-left text-xs cursor-pointer" @click="sortBy('reversal_date')">
+            <div class="flex items-center">
+                Reversal Date
+                <i :class="sortIcon('reversal_date')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-24 text-left text-xs cursor-pointer" @click="sortBy('date_updated')">
+            <div class="flex items-center">
+                Date Updated
+                <i :class="sortIcon('date_updated')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-32 text-left text-xs cursor-pointer" @click="sortBy('book_cost_sec_ccy')">
+            <div class="flex items-center">
+                Book Cost Sec CCY
+                <i :class="sortIcon('book_cost_sec_ccy')" class="ml-1"></i>
+            </div>
+        </th>
+        <th class="px-4 py-2 w-32 text-left text-xs cursor-pointer" @click="sortBy('book_cost_ref_ccy')">
+            <div class="flex items-center">
+                Book Cost Ref CCY
+                <i :class="sortIcon('book_cost_ref_ccy')" class="ml-1"></i>
+            </div>
+        </th>
+    </tr>
+</thead>
+
                     <tbody>
                         <tr v-for="(item, index) in paginatedItems" :key="index" class="border-b border-gray-200">
                             <td class="px-4 py-2 text-xs">{{ item.rec_id }}</td>
@@ -261,14 +264,15 @@ export default {
             isLoading: false,
             searchQuery: '',
             currentPage: 1,
-            itemsPerPage: 10, // Number of items per page
+            itemsPerPage: 5, // Default number of items per page
+            itemsPerPageOptions: [5, 10, 20, 50], // Options for items per page
             sortByColumn: '', // Column to sort by
             sortDirection: 'asc', // Initial sort direction
         };
     },
     computed: {
         paginatedItems() {
-            const filteredItems = this.securityTransactions.filter(item => 
+            const filteredItems = this.securityTransactions.filter(item =>
                 item.rec_id.toString().includes(this.searchQuery)
             );
             const sortedItems = this.sortData(filteredItems);
@@ -277,7 +281,7 @@ export default {
             return sortedItems.slice(startIndex, endIndex);
         },
         totalPages() {
-            const filteredItems = this.securityTransactions.filter(item => 
+            const filteredItems = this.securityTransactions.filter(item =>
                 item.rec_id.toString().includes(this.searchQuery)
             );
             return Math.ceil(filteredItems.length / this.itemsPerPage);
@@ -308,14 +312,6 @@ export default {
                 this.currentPage--;
             }
         },
-        sortBy(column) {
-            if (column === this.sortByColumn) {
-                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                this.sortByColumn = column;
-                this.sortDirection = 'asc';
-            }
-        },
         sortData(data) {
             const sortedData = data.slice().sort((a, b) => {
                 const fieldA = a[this.sortByColumn];
@@ -329,6 +325,20 @@ export default {
                 return this.sortDirection === 'desc' ? comparison * -1 : comparison;
             });
             return sortedData;
+        },
+        sortBy(key) {
+            if (this.sortByColumn === key) {
+                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortByColumn = key;
+                this.sortDirection = 'asc';
+            }
+        },
+        sortIcon(column) {
+            if (this.sortByColumn === column) {
+                return this.sortDirection === 'asc' ? 'cil-arrow-top' : 'cil-arrow-bottom';
+            }
+            return '';
         },
     },
 };

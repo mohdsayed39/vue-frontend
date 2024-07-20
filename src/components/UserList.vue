@@ -1,62 +1,79 @@
 <template>
-  <div class="p-4">
-    <div class="flex items-center mb-4">
-      <button class="text-blue-500 text-2xl mr-2" @click="goBack">
-        <i class="fas fa-arrow-left"></i>
-      </button>
-      <h1 class="text-2xl font-bold">User List</h1>
-    </div>
-    <button class="bg-blue-500 text-white px-4 py-2 rounded mb-4" @click="showCreateForm">Add User</button>
-    <div v-if="isLoading" class="text-center my-8">
-      Loading...
-    </div>
-    <div v-else>
-      <table class="min-w-full bg-white">
-        <thead>
-          <tr>
-            <th class="py-2">ID</th>
-            <th class="py-2">Username</th>
-            <th class="py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in sortedUsers" :key="user.id" class="border-t">
-            <td class="py-2 text-center">{{ user.id }}</td>
-            <td class="py-2">{{ user.username }}</td>
-            <td class="py-2 flex justify-center">
-              <button class="bg-yellow-500 text-white px-4 py-2 rounded mr-2" @click="editUser(user)">Edit</button>
-              <button class="bg-red-500 text-white px-4 py-2 rounded" @click="deleteUser(user.id)">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <div>
+    <Home />
+    <div class="p-4">
+      <div class="flex items-center mb-4">
+        <button class="text-blue-500 text-2xl mr-2" @click="goBack">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1 class="text-2xl font-bold">User List</h1>
+      </div>
+      <button class="bg-blue-500 text-white px-4 py-2 rounded mb-4" @click="showCreateForm">Add User</button>
+      <div class="flex items-center mb-3">
+        <span class="font-bold font-l mr-2">Filter:</span>
+        <input v-model="searchQuery" type="text" placeholder="Search..."
+          class="w-25 border p-2 focus:!border-blue-500 focus:outline-none focus:shadow-outline" />
+      </div>
+      <div v-if="isLoading" class="text-center my-8">
+        Loading...
+      </div>
+      <div v-else>
+        <div class="table-responsive">
+          <table class="table table-hover table-striped table-bordered table-sm">
+            <thead>
+              <tr>
+                <th class="py-2 cursor-pointer" @click="sortBy('id')">
+                  ID
+                  <i :class="sortIcon('id')" class="ml-1"></i>
+                </th>
+                <th class="py-2 cursor-pointer" @click="sortBy('username')">
+                  Username
+                  <i :class="sortIcon('username')" class="ml-1"></i>
+                </th>
+                <th class="py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in filteredAndSortedUsers" :key="user.id" class="border-t">
+                <td class="py-2 text-center">{{ user.id }}</td>
+                <td class="py-2">{{ user.username }}</td>
+                <td class="py-2">
+                  <button class="btn btn-primary btn-sm mr-3" @click="editUser(user)">Edit</button>
+                  <button class="btn btn-danger btn-sm" @click="deleteUser(user.id)">Delete</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-    <Modal v-if="showForm" @close="cancelEdit" :title="editMode ? 'Edit User' : 'Create User'">
-      <form @submit.prevent="editMode ? updateUser() : createUser()">
-        <div class="mb-4">
-          <label for="username" class="block mb-2">Username:</label>
-          <input type="text" v-model="formData.username" id="username" class="border p-2 w-full" required>
-        </div>
-        <div class="mb-4">
-          <label for="password" class="block mb-2">Password:</label>
-          <input type="password" v-model="formData.password" id="password" class="border p-2 w-full" required>
-        </div>
-        <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded mr-2">{{ editMode ? 'Update' : 'Create'
-          }}</button>
-        <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded" @click="cancelEdit">Cancel</button>
-      </form>
-    </Modal>
+      <Modal v-if="showForm" @close="cancelEdit" :title="editMode ? 'Edit User' : 'Create User'">
+        <form @submit.prevent="editMode ? updateUser() : createUser()">
+          <div class="mb-4">
+            <label for="username" class="block mb-2">Username:</label>
+            <input type="text" v-model="formData.username" id="username" class="border p-2 w-full" required>
+          </div>
+          <div class="mb-4">
+            <label for="password" class="block mb-2">Password:</label>
+            <input type="password" v-model="formData.password" id="password" class="border p-2 w-full" required>
+          </div>
+          <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded mr-2">{{ editMode ? 'Update' : 'Create'
+            }}</button>
+          <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded" @click="cancelEdit">Cancel</button>
+        </form>
+      </Modal>
+    </div>
   </div>
 </template>
 
 <script>
 import Modal from '@/components/Modal.vue';
 import { fetchUsers, createUser, updateUser, deleteUser } from '@/services/userService';
+import Home from '@/components/Home.vue';
 
 export default {
   name: 'UserList',
-  components: { Modal },
+  components: { Modal, Home },
   data() {
     return {
       users: [],
@@ -67,12 +84,32 @@ export default {
         id: null,
         username: '',
         password: ''
-      }
+      },
+      searchQuery: '',
+      sortKey: 'id', // Default sort by 'id'
+      sortOrder: 'asc' // Default sort order 'asc'
     };
   },
   computed: {
-    sortedUsers() {
-      return this.users.slice().sort((a, b) => a.id - b.id);
+    filteredAndSortedUsers() {
+      // Filter users based on search query
+      let users = this.users.filter(user =>
+        (user.username && user.username.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+        (user.email && user.email.toLowerCase().includes(this.searchQuery.toLowerCase()))
+      );
+
+      // Sort users based on sortKey and sortOrder
+      if (this.sortKey) {
+        users = users.sort((a, b) => {
+          let modifier = 1;
+          if (this.sortOrder === 'desc') modifier = -1;
+          if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
+          if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
+          return 0;
+        });
+      }
+
+      return users;
     }
   },
   methods: {
@@ -131,6 +168,18 @@ export default {
     goBack() {
       this.$router.go(-1);
     },
+    sortBy(key) {
+      if (this.sortKey === key) {
+        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortKey = key;
+        this.sortOrder = 'asc';
+      }
+    },
+    sortIcon(key) {
+      if (this.sortKey !== key) return 'cil-arrow-top'; // Default icon
+      return this.sortOrder === 'asc' ? 'cil-arrow-top' : 'cil-arrow-bottom';
+    }
   },
   mounted() {
     this.fetchUsers();
@@ -139,5 +188,7 @@ export default {
 </script>
 
 <style scoped>
-/* Add your styles here */
+.cursor-pointer {
+  cursor: pointer;
+}
 </style>
