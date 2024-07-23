@@ -1,4 +1,4 @@
-# frontend-interview-vue2
+# frontend-vue2
 
 ## Project setup
 ```
